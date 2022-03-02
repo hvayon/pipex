@@ -4,49 +4,76 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <sys/types.h>
 //----delete----
 
-int child_process(char *cmd1, t_pipex *data, int pipefd[2])
+
+int child_process(char *cmd1, t_pipex *data, int *pipefd, char **envp)
 {
     char *tmp;
-    char *cmd;
-    int check;
-    int check2;
+    char *cmp;
+    char **path;
+    int i = 0;
 
-    if (dup2(data->infile, 0) == -1)
-        return (0);
-    check2 = dup2(pipefd[1], 0);   
+    path = data->cmp_path;
+
+    if (dup2(data->infile, STDIN_FILENO) == -1)
+        exit (0);
+    if (dup2(pipefd[1], STDOUT_FILENO)== -1)
+        perror("dup2 failed");
+    
+
     close(pipefd[0]);
     close(data->infile);
-    if (check < 0 || check2 < 0) 
-        exit (0);
-    
-    //cmd = make_cmd;
-    //написать функцию, в которой проверяем, что нам не дали путь целиком
-    while(data->cmp_path)
+
+    while(path[i])
     {
-        tmp = ft_strjoin(*(data->cmp_path), "/"); //проверка на ошибку
+        tmp = ft_strjoin(path[i], "/");
         if (!tmp)
-            free(tmp);
             return(0);
-        cmd = ft_strjoin(tmp, cmd1);
-        if (!cmd)
-            free(tmp);
+        cmp = ft_strjoin(tmp, cmd1);
+        printf("%s\n", cmd1);
+        if (!cmp)
             return(0);
-        if (!access(cmd, 0))
-            return (0);
+        if (!access(cmp, 0)) //должен быть равен нулю
+            return(*cmp);
+        i++;
     }
-    printf("Это процесс-потомок\n");
+    execve(cmp, &cmd1, envp);
     return EXIT_SUCCESS;
 }
 
-int parent_process(char *cmd1, t_pipex *data, int pipefd[2])
+int parent_process(char *cmd2, t_pipex *data, int *pipefd, char **envp)
 {
     int status;
+    char **path;
+    char *tmp;
+    char *cmp;
+
+    int i = 0;
     
-    waitpid(data->pid1, &status, 0);
+    path = data->cmp_path;
+    waitpid(data->pid1, &status, 0); //родитель ждет пока завершиться потомок
+    if (dup2(pipefd[0], STDIN_FILENO) == -1)
+        exit (0);
+    if (dup2(data->outfile, STDOUT_FILENO) < 0)
+        perror("dup2 failed");
     printf("Это процесс-родитель\n");
+    close(pipefd[1]);
+    close(data->outfile);
+    while(path[i])
+    {
+        tmp = ft_strjoin(path[i], "/");
+        if (!tmp)
+            return(0);
+        cmp = ft_strjoin(tmp, cmd2);
+        printf("%s\n", cmp);
+        if (!cmp)
+            return(0);
+        if (!access(cmp, 0))
+            return(*cmp); //file present
+        i++;
+    }
+    execve(cmp, &cmd2, envp);
     return EXIT_SUCCESS;
 }
 
@@ -60,39 +87,31 @@ int main(int argc, char **argv, char **envp)
     data->infile = open(argv[1], O_RDONLY);
     if (data->infile == -1)
         return (0);
-    data->outfile = open(argv[argc - 1], O_CREAT | O_RDWR | O_TRUNC, 0644); // чтетение и запись
+    data->outfile = open(argv[argc - 1], O_CREAT | O_RDWR | O_TRUNC, 0777); // чтетение и запись
     if (data->outfile == -1) 
         return (0);
     if (*envp == 0)
         return (0);
     if (envp != 0)
     {
-        while(*envp != NULL)
+        while(envp != 0)
         {
-            //printf("%s\n", *envp); // печать окружения
             if (ft_strncmp("PATH=", *envp, 5) == 0)
             {
                 data->path = *(envp);
-                data->path = &(data->path[6]);
-                //printf("Найденный PATH = %s\n", data->path);
                 break;
             }
             envp++;
         }
     }
     data->cmp_path = ft_split(data->path, ':');
-    printf("Результат работы split = %s\n", data->cmp_path[1]);
-    
     pipe(pipefd);
-
     data->pid1 = fork(); //определение идентификатора процесса
-    printf("pid1 - %d\n", data->pid1);
     if (data->pid1 < 0)
         perror("Fork: ");
     if (data->pid1 == 0) // это процесс потомок
-    {
-        child_process(argv[2], data, pipefd);
-    }
+        child_process(argv[2], data, pipefd, envp);
     else
-        parent_process(argv[2], data, pipefd);
+        parent_process(argv[3], data, pipefd, envp);
+    return(0);
 }
