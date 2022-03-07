@@ -1,117 +1,134 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   main.c                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: natalia <natalia@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2022/03/05 23:02:20 by natalia           #+#    #+#             */
+/*   Updated: 2022/03/06 21:20:24 by natalia          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "pipex.h"
 
-//----delete----
+#include <sys/types.h>
+#include <unistd.h>
+#include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-//----delete----
+#include <sys/types.h>
+#include <sys/wait.h>
 
-
-int child_process(char *cmd1, t_pipex *data, int *pipefd, char **envp)
+char    **ft_find_path(char **envp)
 {
-    char *tmp;
-    char *cmp;
-    char **path;
-    int i = 0;
+    char *path_envp;
+    char **paths;
+    int i;
 
-    path = data->cmp_path;
-
-    if (dup2(data->infile, STDIN_FILENO) == -1)
-        exit (0);
-    if (dup2(pipefd[1], STDOUT_FILENO)== -1)
-        perror("dup2 failed");
-    
-
-    close(pipefd[0]);
-    close(data->infile);
-
-    while(path[i])
-    {
-        tmp = ft_strjoin(path[i], "/");
-        if (!tmp)
-            return(0);
-        cmp = ft_strjoin(tmp, cmd1);
-        printf("%s\n", cmd1);
-        if (!cmp)
-            return(0);
-        if (!access(cmp, 0)) //должен быть равен нулю
-            return(*cmp);
-        i++;
-    }
-    execve(cmp, &cmd1, envp);
-    return EXIT_SUCCESS;
-}
-
-int parent_process(char *cmd2, t_pipex *data, int *pipefd, char **envp)
-{
-    int status;
-    char **path;
-    char *tmp;
-    char *cmp;
-
-    int i = 0;
-    
-    path = data->cmp_path;
-    waitpid(data->pid1, &status, 0); //родитель ждет пока завершиться потомок
-    if (dup2(pipefd[0], STDIN_FILENO) == -1)
-        exit (0);
-    if (dup2(data->outfile, STDOUT_FILENO) < 0)
-        perror("dup2 failed");
-    printf("Это процесс-родитель\n");
-    close(pipefd[1]);
-    close(data->outfile);
-    while(path[i])
-    {
-        tmp = ft_strjoin(path[i], "/");
-        if (!tmp)
-            return(0);
-        cmp = ft_strjoin(tmp, cmd2);
-        printf("%s\n", cmp);
-        if (!cmp)
-            return(0);
-        if (!access(cmp, 0))
-            return(*cmp); //file present
-        i++;
-    }
-    execve(cmp, &cmd2, envp);
-    return EXIT_SUCCESS;
-}
-
-int main(int argc, char **argv, char **envp)
-{
-    int pipefd[2];
-    t_pipex *data;
-    data = (t_pipex *)malloc(sizeof(t_pipex));
-    if (argc != 5)
-        return (0);
-    data->infile = open(argv[1], O_RDONLY);
-    if (data->infile == -1)
-        return (0);
-    data->outfile = open(argv[argc - 1], O_CREAT | O_RDWR | O_TRUNC, 0777); // чтетение и запись
-    if (data->outfile == -1) 
-        return (0);
-    if (*envp == 0)
-        return (0);
+    i = 0;
     if (envp != 0)
     {
         while(envp != 0)
         {
             if (ft_strncmp("PATH=", *envp, 5) == 0)
             {
-                data->path = *(envp);
+                path_envp = *(envp);
+                path_envp = &path_envp[5];
                 break;
             }
             envp++;
         }
     }
-    data->cmp_path = ft_split(data->path, ':');
+    if (path_envp != 0)
+        paths = ft_split(path_envp, ':');
+    while(paths[i])
+    {
+        paths[i] = ft_strjoin(paths[i], "/");
+        i++;
+    }
+    return(paths);
+}
+
+void ft_check_sistem_bin(char *cmd, char ***comands,
+		char **envp, char **path)
+{
+    char *tmp;
+    int i;
+    char **paths;
+    i = 0;
+
+    paths = ft_find_path(envp);
+    *comands = ft_split(cmd, ' ');
+    while(paths && *paths)
+    {
+        *path = ft_strjoin(*paths, (*comands)[0]);
+        if (!*path)
+            exit(0);
+        if (access(*path, F_OK) == 0)
+            break ;
+        paths++;
+    }
+}
+
+void child_process(int pipefd[2], char *cmd1, t_pipex *data, char **envp)
+{
+    int i;
+    char **comands;
+    char *path;
+    char **paths;
+    i = 0;
+
+    if (dup2(data->infile, STDIN_FILENO) == -1)
+        printf("dup2 error");
+    if (dup2(pipefd[1],STDOUT_FILENO) == -1)
+        printf("dup2 error");
+    close(pipefd[0]);
+    close(data->infile);
+    ft_check_sistem_bin(cmd1, &comands, envp, &path);
+    execve(path, comands, envp);
+}
+
+void parent_process(int pipefd[2], char *cmd2, t_pipex *data, pid_t pid, char **envp)
+{
+    int status;
+    char *buf;
+    char *path;
+    char **comands;
+
+
+    buf = malloc(10);
+    waitpid(pid, &status, 0);
+    if (dup2(data->outfile, STDOUT_FILENO) == -1)
+        perror("dup2 failed");
+    if (dup2(pipefd[0], STDIN_FILENO) == -1)
+        perror("dup2 failed");
+    close(pipefd[1]);
+    close(data->outfile);
+    ft_check_sistem_bin(cmd2, &comands, envp, &path);
+    execve(path, comands, envp);
+}
+
+int main(int argc, char **argv, char **envp)
+{
+    int pipefd[2];
+    pid_t pid;
+    t_pipex *data;
+    char **path;
+    
+    if (argc != 5)
+        return (0);
+    data->infile = open(argv[1], O_RDONLY, 0777);
+    data->outfile = open(argv[argc - 1], O_CREAT | O_RDWR | O_TRUNC, 0777); // чтетение и запись
+    if (data->outfile < 0 || data->infile < 0)
+    {
+        printf("Open error");
+        return (0);
+    }
     pipe(pipefd);
-    data->pid1 = fork(); //определение идентификатора процесса
-    if (data->pid1 < 0)
-        perror("Fork: ");
-    if (data->pid1 == 0) // это процесс потомок
-        child_process(argv[2], data, pipefd, envp);
+    pid = fork();
+    if (!pid)
+        child_process(pipefd, argv[2], data, envp);
     else
-        parent_process(argv[3], data, pipefd, envp);
-    return(0);
+        parent_process(pipefd,argv[3], data, pid, envp);
 }

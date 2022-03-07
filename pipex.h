@@ -9,8 +9,8 @@
 
 typedef	struct s_pipex
 {
-	char *path; //путь
-	char **cmp_path; //разделены сплитом
+	// char *path; //путь
+	// char **comand_path; //разделены сплитом
 	pid_t pid1; //идентификатор процесса
 	pid_t pid2;
 	int infile;

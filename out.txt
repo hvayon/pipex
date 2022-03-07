@@ -1,9 +1,0 @@
-Это процесс-родитель
-PATH=/Library/Frameworks/Python.framework/Versions/3.9/bin/wc -l
-/usr/local/bin/wc -l
-/usr/bin/wc -l
-/bin/wc -l
-/usr/sbin/wc -l
-/sbin/wc -l
-/opt/X11/bin/wc -l
-/Library/Frameworks/Python.framework/Versions/3.9/bin/wc -l
