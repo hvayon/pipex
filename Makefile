@@ -6,13 +6,15 @@
 #    By: natalia <natalia@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/03/07 11:58:06 by natalia           #+#    #+#              #
-#    Updated: 2022/03/07 12:00:47 by natalia          ###   ########.fr        #
+#    Updated: 2022/03/10 22:40:06 by natalia          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 HEADER = pipex.h
 NAME = pipex
-SRC = 	main.c \
+SRC = 	main.c ft_find_path.c \
+		ft_check_sistem_bin.c \
+		ft_child_process.c \
 
 CC = cc 
 FLAGS = -Wall -Wextra -Werror
