@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: natalia <natalia@student.42.fr>            +#+  +:+       +#+         #
+#    By: hvayon <hvayon@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/03/07 11:58:06 by natalia           #+#    #+#              #
-#    Updated: 2022/03/10 22:40:06 by natalia          ###   ########.fr        #
+#    Updated: 2022/03/12 15:36:45 by hvayon           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -15,6 +15,7 @@ NAME = pipex
 SRC = 	main.c ft_find_path.c \
 		ft_check_sistem_bin.c \
 		ft_child_process.c \
+		ft_parent_process.c \
 
 CC = cc 
 FLAGS = -Wall -Wextra -Werror

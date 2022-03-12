@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_child_process.c                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: natalia <natalia@student.42.fr>            +#+  +:+       +#+        */
+/*   By: hvayon <hvayon@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/10 21:54:48 by natalia           #+#    #+#             */
-/*   Updated: 2022/03/10 22:48:30 by natalia          ###   ########.fr       */
+/*   Updated: 2022/03/12 15:39:05 by hvayon           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,5 +52,4 @@ void	child_process(int pipefd[2], char *cmd1, t_pipex *data, char **envp)
 	close(pipefd[0]);
 	close(data->infile);
 	execve(path, comands, envp);
-	free(comands);
 }
