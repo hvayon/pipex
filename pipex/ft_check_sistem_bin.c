@@ -6,7 +6,7 @@
 /*   By: hvayon <hvayon@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/10 21:40:19 by natalia           #+#    #+#             */
-/*   Updated: 2022/03/12 15:51:02 by hvayon           ###   ########.fr       */
+/*   Updated: 2022/05/23 20:18:43 by hvayon           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,23 +32,23 @@ char	*ft_check_sistem_bin(char *cmd, char ***comands, char **paths)
 	return (NULL);
 }
 
-char	**ft_comands_for_full_path(char *cmd, char **comands)
+char	**ft_commands_for_full_path(char *cmd, char **commands)
 {
 	char	**path;
 	int		i;
 
 	path = NULL;
 	i = 0;
-	comands = ft_split(cmd, '/');
-	if (!comands)
+	commands = ft_split(cmd, '/');
+	if (!commands)
 	{
-		free(comands);
+		free(commands);
 	}
-	while (comands[i])
+	while (commands[i])
 	{
 		i++;
 	}
 	i--;
-	comands = ft_split((comands)[i], ' ');
-	return (comands);
+	commands = ft_split((commands)[i], ' ');
+	return (commands);
 }

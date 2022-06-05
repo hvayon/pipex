@@ -1,16 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_find_path.c                                     :+:      :+:    :+:   */
+/*   ft_find_path_bonus.c                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: hvayon <hvayon@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/03/10 21:09:54 by natalia           #+#    #+#             */
-/*   Updated: 2022/03/12 14:54:26 by hvayon           ###   ########.fr       */
+/*   Created: 2022/05/22 17:54:50 by hvayon            #+#    #+#             */
+/*   Updated: 2022/05/24 19:42:53 by hvayon           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "pipex.h"
+#include "pipex_bonus.h"
 
 char	*ft_find_path_in_envp(char **envp)
 {
@@ -48,7 +48,7 @@ char	**ft_find_path(char **envp)
 	{
 		tmp = paths[i];
 		paths[i] = ft_strjoin(paths[i], "/");
-		free (tmp);
+		free(tmp);
 		i++;
 	}
 	return (paths);

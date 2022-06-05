@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_split.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: natalia <natalia@student.42.fr>            +#+  +:+       +#+        */
+/*   By: hvayon <hvayon@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/24 15:05:01 by hvayon            #+#    #+#             */
-/*   Updated: 2022/02/26 19:28:24 by natalia          ###   ########.fr       */
+/*   Updated: 2022/05/24 19:44:07 by hvayon           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,6 +71,8 @@ static char	*ft_next_word(char const *s, char c, int *j)
 		tmp++;
 	}
 	word = (char *)malloc(sizeof(char) * (len + 1));
+	if (!word)
+		exit (1);
 	return (ft_fill_word(s, word, len, j));
 }
 
@@ -100,7 +102,7 @@ char	**ft_split(char const *s, char c)
 	count = ft_wcount(s, c);
 	words_arr = (char **)malloc(sizeof(char *) * count + 1);
 	if (!words_arr)
-		return (NULL);
+		exit (1);
 	words_arr[count] = NULL;
 	i = 0;
 	j = 0;
